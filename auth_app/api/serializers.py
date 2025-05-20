@@ -24,7 +24,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('repeated_password')
         validated_data['password'] = make_password(validated_data['password'])
 
-        # Generiere eindeutigen username aus der E-Mail
         email = validated_data.get('email')
         base_username = email.split('@')[0]
         username = base_username
