@@ -20,9 +20,10 @@ class TaskListSerializer(serializers.ModelSerializer):
     def get_comments_count(self, obj):
         return obj.comments.count()
 
+
 class TaskSerializer(serializers.ModelSerializer):
     assignee_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
-    reviewer_id = serializers.IntegerField(write_only=True, required=True)
+    reviewer_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = Task
@@ -30,43 +31,35 @@ class TaskSerializer(serializers.ModelSerializer):
             'id', 'board', 'title', 'description', 'status',
             'priority', 'assignee_id', 'reviewer_id', 'due_date'
         ]
-        read_only_fields = ['assignee', 'reviewer']
 
     def create(self, validated_data):
         assignee_id = validated_data.pop('assignee_id', None)
         reviewer_id = validated_data.pop('reviewer_id', None)
 
-        if assignee_id is not None:
-            validated_data['assignee'] = User.objects.get(id=assignee_id)
-        else:
-            validated_data['assignee'] = None
-        if reviewer_id is not None:
-            validated_data['reviewer'] = User.objects.get(id=reviewer_id)
+        validated_data['assignee'] = User.objects.get(id=assignee_id) if assignee_id else None
+        validated_data['reviewer'] = User.objects.get(id=reviewer_id) if reviewer_id else None
 
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         validated_data.pop('board', None)
-        assignee_id = validated_data.pop('assignee_id', None)
-        reviewer_id = validated_data.pop('reviewer_id', None)
 
-        if assignee_id is not None:
-            instance.assignee = User.objects.get(id=assignee_id)
-        elif 'assignee_id' in self.initial_data:
-            instance.assignee = None
+        if 'assignee_id' in self.initial_data:
+            assignee_id = validated_data.pop('assignee_id', None)
+            instance.assignee = User.objects.get(id=assignee_id) if assignee_id else None
 
-        if reviewer_id is not None:
-            instance.reviewer = User.objects.get(id=reviewer_id)
-        elif 'reviewer_id' in self.initial_data:
-            instance.reviewer = None
+        if 'reviewer_id' in self.initial_data:
+            reviewer_id = validated_data.pop('reviewer_id', None)
+            instance.reviewer = User.objects.get(id=reviewer_id) if reviewer_id else None
 
         return super().update(instance, validated_data)
-    
+
     def validate(self, attrs):
-        if not self.initial_data.get('reviewer_id'):
+        if self.instance is None and not self.initial_data.get('reviewer_id'):
             raise serializers.ValidationError({'reviewer_id': 'Dieses Feld ist erforderlich.'})
         return attrs
+
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()

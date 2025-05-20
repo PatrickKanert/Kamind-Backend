@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from tasks_app.models import Task, Comment
 from .serializers import TaskListSerializer, TaskSerializer, CommentSerializer
-from boards_app.models import Board
 
 class AssignedTasksView(APIView):
     permission_classes = [permissions.IsAuthenticated]
