@@ -10,6 +10,34 @@ class UserShortSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'fullname']
 
+# Basic serializer for listing and creating boards
+class BoardSerializer(serializers.ModelSerializer):
+    # Computed fields
+    member_count = serializers.SerializerMethodField()
+    ticket_count = serializers.SerializerMethodField()
+    tasks_to_do_count = serializers.SerializerMethodField()
+    tasks_high_prio_count = serializers.SerializerMethodField()
+    owner_id = serializers.IntegerField(source='owner.id', read_only=True)
+
+    class Meta:
+        model = Board
+        fields = [
+            'id', 'title', 'member_count', 'ticket_count',
+            'tasks_to_do_count', 'tasks_high_prio_count', 'owner_id'
+        ]
+
+    def get_member_count(self, obj):
+        return obj.members.count()
+
+    def get_ticket_count(self, obj):
+        return obj.tasks.count()
+
+    def get_tasks_to_do_count(self, obj):
+        return obj.tasks.filter(status='to-do').count()
+
+    def get_tasks_high_prio_count(self, obj):
+        return obj.tasks.filter(priority='high').count()
+
 # Detailed serializer for retrieving a full board view with members and tasks
 class BoardDetailSerializer(serializers.ModelSerializer):
     # ID of the board owner (for easy access in frontend)
@@ -36,15 +64,6 @@ class BoardDetailSerializer(serializers.ModelSerializer):
         ]
 
     # Optional helper methods (currently unused in this serializer)
-
-    def get_member_count(self, obj):
-        """Returns the number of members in the board."""
-        return obj.members.count()
-
-    def get_ticket_count(self, obj):
-        """Returns the total number of tasks (tickets) in the board."""
-        return obj.tasks.count()
-
     def get_tasks_to_do_count(self, obj):
         """Returns the number of tasks with status 'to-do'."""
         return obj.tasks.filter(status='to-do').count()
