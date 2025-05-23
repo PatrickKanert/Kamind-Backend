@@ -3,6 +3,7 @@ from .serializers import BoardSerializer, BoardDetailSerializer
 from boards_app.models import Board
 from django.db import models
 from rest_framework.response import Response
+from .serializers import UserShortSerializer
 
 class BoardViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -32,4 +33,8 @@ class BoardViewSet(viewsets.ModelViewSet):
             members = request.data['members']
             instance.members.set(members)
 
-        return Response(serializer.data)
+        response_data = serializer.data
+        response_data['owner_data'] = UserShortSerializer(instance.owner).data
+        response_data['members_data'] = UserShortSerializer(instance.members.all(), many=True).data
+
+        return Response(response_data)

@@ -9,18 +9,17 @@ class UserShortSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'fullname']
 
-class BoardSerializer(serializers.ModelSerializer):
-    member_count = serializers.SerializerMethodField()
-    ticket_count = serializers.SerializerMethodField()
-    tasks_to_do_count = serializers.SerializerMethodField()
-    tasks_high_prio_count = serializers.SerializerMethodField()
+class BoardDetailSerializer(serializers.ModelSerializer):
     owner_id = serializers.IntegerField(source='owner.id', read_only=True)
+    owner_data = UserShortSerializer(source='owner', read_only=True)
+    members = UserShortSerializer(many=True, read_only=True)
+    tasks = TaskListSerializer(many=True, read_only=True)
 
     class Meta:
         model = Board
         fields = [
-            'id', 'title', 'member_count', 'ticket_count',
-            'tasks_to_do_count', 'tasks_high_prio_count', 'owner_id'
+            'id', 'title', 'owner_id', 'owner_data', 
+            'members', 'tasks'
         ]
 
     def get_member_count(self, obj):
@@ -34,16 +33,3 @@ class BoardSerializer(serializers.ModelSerializer):
 
     def get_tasks_high_prio_count(self, obj):
         return obj.tasks.filter(priority='high').count()
-
-
-class BoardDetailSerializer(serializers.ModelSerializer):
-    owner_id = serializers.IntegerField(source='owner.id', read_only=True)
-    members = UserShortSerializer(many=True, read_only=True)
-    tasks = TaskListSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Board
-        fields = [
-            'id', 'title', 'owner_id', 'members', 'tasks'
-        ]
-

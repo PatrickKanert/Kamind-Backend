@@ -25,11 +25,16 @@ class TaskSerializer(serializers.ModelSerializer):
     assignee_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     reviewer_id = serializers.IntegerField(write_only=True, required=False)
 
+    assignee = UserShortSerializer(read_only=True)  # 👈 NEU
+    reviewer = UserShortSerializer(read_only=True)  # 👈 NEU
+
     class Meta:
         model = Task
         fields = [
             'id', 'board', 'title', 'description', 'status',
-            'priority', 'assignee_id', 'reviewer_id', 'due_date'
+            'priority', 'assignee_id', 'reviewer_id',
+            'assignee', 'reviewer',  # 👈 NEU
+            'due_date'
         ]
 
     def create(self, validated_data):
