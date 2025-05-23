@@ -1,6 +1,6 @@
-# 🧠 KanMind – Aufgaben- und Nutzerverwaltung
+# 🧠 KanMind – Task and User Management
 
-KanMind ist ein Lernprojekt, das ein Django REST Framework Backend mit einem einfachen Vanilla JavaScript Frontend kombiniert. Es ermöglicht die Verwaltung von Aufgaben, Boards und Nutzern – mit Login- und Registrierungssystem.
+KanMind is a learning project that combines a Django REST Framework backend with a simple Vanilla JavaScript frontend. It enables the management of tasks, boards, and users – with login and registration functionality.
 
 ---
 
@@ -8,84 +8,99 @@ KanMind ist ein Lernprojekt, das ein Django REST Framework Backend mit einem ein
 
 - **Backend:** Django 5.2 + Django REST Framework + Token Auth
 - **Frontend:** HTML, CSS, Vanilla JavaScript
-- **Datenbank:** SQLite (lokal)
-- **API-Auth:** Token-basierte Authentifizierung (`TokenAuthentication`)
+- **Database:** SQLite (local)
+- **API Auth:** Token-based authentication (`TokenAuthentication`)
 
 ---
 
-## 🚀 Schnellstart
+## 🚀 Quickstart
 
-### 📁 Backend starten
+### 📁 Backend Setup
 
-1. **Abhängigkeiten installieren**
+1. **Create and activate a virtual environment**  
+   *(recommended for dependency isolation)*
+
+   **On Windows:**
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+
+   **On macOS/Linux:**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+2. **Install dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Migrationen ausführen**
+3. **Run migrations**
    ```bash
    python manage.py migrate
    ```
 
-3. **Superuser erstellen (optional)**
+4. **Create superuser (optional)**
    ```bash
    python manage.py createsuperuser
    ```
 
-4. **Entwicklungsserver starten**
+5. **Start development server**
    ```bash
    python manage.py runserver
    ```
 
-→ Die API läuft unter: `http://127.0.0.1:8000/`
+→ The API is available at: `http://127.0.0.1:8000/`
 
 ---
 
-### 🌐 Frontend starten
+### 🌐 Frontend Setup
 
-1. Öffne das Projekt im Editor (z. B. VS Code)
-2. Öffne die Datei `index.html` im Hauptverzeichnis
-3. Starte sie mit **Live Server** oder einem lokalen Server
+1. Open the project in your editor (e.g. VS Code)
+2. Open `index.html` from the project root
+3. Launch it using **Live Server** or any local server
 
-> 🔁 Das Frontend leitet je nach Login-Status automatisch zu Login oder Dashboard weiter.
-
----
-
-## 📬 API-Endpunkte
-
-### 🔐 Authentifizierung
-
-- `POST /api/register/` – Benutzer registrieren
-- `POST /api/login/` – Benutzer einloggen (Token wird zurückgegeben)
-
-### 👤 Nutzer
-
-- `GET /api/email-check/?email=...` – prüft, ob ein Benutzer mit der E-Mail existiert
-
-### 🗂️ Boards & Tasks (nur mit Token)
-
-- `GET /api/boards/` – alle Boards, bei denen man Mitglied ist
-- `GET /api/tasks/assigned-to-me/` – alle zugewiesenen Tasks
-- `GET /api/tasks/reviewing/` – Tasks, bei denen man Reviewer ist
+> 🔁 The frontend redirects automatically to login or dashboard based on the login state.
 
 ---
 
-## 💾 Lokale Speicherung
+## 📬 API Endpoints
 
-Das Frontend nutzt `localStorage` zur Speicherung von:
+### 🔐 Authentication
+
+- `POST /api/register/` – Register a user
+- `POST /api/login/` – Log in a user (returns token)
+
+### 👤 Users
+
+- `GET /api/email-check/?email=...` – Check if a user exists by email
+
+### 🗂️ Boards & Tasks (Token required)
+
+- `GET /api/boards/` – All boards the user is a member of
+- `GET /api/tasks/assigned-to-me/` – All tasks assigned to the user
+- `GET /api/tasks/reviewing/` – Tasks where the user is a reviewer
+
+---
+
+## 💾 Local Storage
+
+The frontend uses `localStorage` to store:
 
 - `auth-token`
 - `auth-user-id`
 - `auth-email`
 - `auth-fullname`
 
-> Hinweis: Probleme beim Login entstehen oft durch veraltete Tokens im localStorage → Konsole: `localStorage.clear()`.
+> Note: Login issues are often caused by outdated tokens in localStorage → fix via browser console: `localStorage.clear()`.
 
 ---
 
-## 🧪 Testen mit Postman
+## 🧪 Testing with Postman
 
-### Registrierung:
+### Registration:
 ```json
 POST /api/register/
 {
@@ -107,17 +122,17 @@ POST /api/login/
 
 ---
 
-## 👥 Entwickler
+## 👥 Developer Notes
 
-Wenn du Änderungen am Backend machst:
+If you're making changes to the backend:
 
-- Achte darauf, die Serializers, Views und URL-Router synchron zu halten
-- Das Frontend ist bewusst einfach gehalten – Anpassungen (Login, API-Calls) erfolgen in `api.js`, `login.js`, etc.
+- Keep serializers, views, and URL routing in sync
+- The frontend is deliberately minimal – changes (e.g. login, API calls) are handled in `api.js`, `login.js`, etc.
 
 ---
 
-## 📝 Lizenz
+## 📝 License
 
-Dieses Projekt ist ein internes Lernprojekt für die Developer Akademie. Es ist nicht für kommerzielle Nutzung oder Weitergabe bestimmt.
+This project is an internal learning project for the Developer Akademie. It is not intended for commercial use or distribution.
 
 ---
