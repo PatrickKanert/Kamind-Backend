@@ -1,37 +1,37 @@
 from rest_framework import viewsets, permissions
-from .serializers import BoardSerializer, BoardDetailSerializer
-from boards_app.models import Board
-from django.db import models
 from rest_framework.response import Response
-from .serializers import UserShortSerializer
 from rest_framework.exceptions import PermissionDenied
+from django.db import models
+
+from boards_app.models import Board
+from .serializers import BoardSerializer, BoardDetailSerializer
 
 class BoardViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        return Board.objects.filter(models.Q(owner=user) | models.Q(members=user)).distinct()
+        return Board.objects.filter(
+            models.Q(owner=user) | models.Q(members=user)
+        ).distinct()
 
     def get_serializer_class(self):
         if self.action in ['retrieve', 'update', 'partial_update']:
             return BoardDetailSerializer
         return BoardSerializer
-    
+
     def get_object(self):
         obj = super().get_object()
         user = self.request.user
-
         if obj.owner != user and user not in obj.members.all():
             raise PermissionDenied("You do not have permission to access this board.")
-
         return obj
 
     def perform_create(self, serializer):
         board = serializer.save(owner=self.request.user)
         members = self.request.data.get('members', [])
         board.members.set(members)
-        
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -43,8 +43,4 @@ class BoardViewSet(viewsets.ModelViewSet):
             members = request.data['members']
             instance.members.set(members)
 
-        response_data = serializer.data
-        response_data['owner_data'] = UserShortSerializer(instance.owner).data
-        response_data['members_data'] = UserShortSerializer(instance.members.all(), many=True).data
-
-        return Response(response_data)
+        return Response(serializer.data)
