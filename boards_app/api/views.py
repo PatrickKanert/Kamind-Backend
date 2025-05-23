@@ -4,6 +4,7 @@ from boards_app.models import Board
 from django.db import models
 from rest_framework.response import Response
 from .serializers import UserShortSerializer
+from rest_framework.exceptions import PermissionDenied
 
 class BoardViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -16,6 +17,15 @@ class BoardViewSet(viewsets.ModelViewSet):
         if self.action in ['retrieve', 'update', 'partial_update']:
             return BoardDetailSerializer
         return BoardSerializer
+    
+    def get_object(self):
+        obj = super().get_object()
+        user = self.request.user
+
+        if obj.owner != user and user not in obj.members.all():
+            raise PermissionDenied("You do not have permission to access this board.")
+
+        return obj
 
     def perform_create(self, serializer):
         board = serializer.save(owner=self.request.user)
