@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from auth_app.api.serializers import UserShortSerializer
 from django.db import models
 
 from boards_app.models import Board
@@ -12,14 +13,8 @@ class BoardViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """
-        Return all boards where the user is either the owner or a member.
-        This ensures the user only sees boards they have access to.
-        """
-        user = self.request.user
-        return Board.objects.filter(
-            models.Q(owner=user) | models.Q(members=user)
-        ).distinct()
+    # Return all boards so get_object() can handle permission checks manually
+        return Board.objects.all()
 
     def get_serializer_class(self):
         """
@@ -70,4 +65,9 @@ class BoardViewSet(viewsets.ModelViewSet):
             members = request.data['members']
             instance.members.set(members)
 
-        return Response(serializer.data)
+        return Response({
+            "id": instance.id,
+            "title": instance.title,
+            "owner_data": UserShortSerializer(instance.owner).data,
+            "members_data": UserShortSerializer(instance.members.all(), many=True).data,
+        })
