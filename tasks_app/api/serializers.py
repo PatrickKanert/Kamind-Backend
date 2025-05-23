@@ -24,17 +24,17 @@ class TaskListSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     assignee_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     reviewer_id = serializers.IntegerField(write_only=True, required=False)
-
-    assignee = UserShortSerializer(read_only=True)  # 👈 NEU
-    reviewer = UserShortSerializer(read_only=True)  # 👈 NEU
+    assignee = UserShortSerializer(read_only=True)
+    reviewer = UserShortSerializer(read_only=True)
+    comments_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
         fields = [
             'id', 'board', 'title', 'description', 'status',
             'priority', 'assignee_id', 'reviewer_id',
-            'assignee', 'reviewer',  # 👈 NEU
-            'due_date'
+            'assignee', 'reviewer',
+            'due_date', 'comments_count',
         ]
 
     def create(self, validated_data):
@@ -45,7 +45,10 @@ class TaskSerializer(serializers.ModelSerializer):
         validated_data['reviewer'] = User.objects.get(id=reviewer_id) if reviewer_id else None
 
         validated_data['created_by'] = self.context['request'].user
-        return super().create(validated_data)
+        
+        task = super().create(validated_data)
+        
+        return task
 
     def update(self, instance, validated_data):
         validated_data.pop('board', None)
