@@ -47,8 +47,11 @@ class BoardDetailSerializer(serializers.ModelSerializer):
     owner_data = UserShortSerializer(source='owner', read_only=True)
 
     # List of all board members as user objects
-    members = UserShortSerializer(many=True, read_only=True)
+    members_data = serializers.SerializerMethodField()
 
+    def get_members_data(self, obj):
+        return UserShortSerializer(obj.members.all(), many=True).data
+    
     # List of all tasks belonging to the board
     tasks = TaskListSerializer(many=True, read_only=True)
 
@@ -59,7 +62,7 @@ class BoardDetailSerializer(serializers.ModelSerializer):
             'title',        # Title of the board
             'owner_id',     # ID of the board owner (read-only)
             'owner_data',   # Full user object of the owner
-            'members',      # List of user objects who are board members
+            'members_data', # List of user objects who are board members
             'tasks'         # List of related tasks
         ]
 
